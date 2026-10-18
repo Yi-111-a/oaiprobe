@@ -50,3 +50,17 @@ def test_auth_header_handling():
 def test_connect_error():
     with pytest.raises(ConnectError):
         Client("http://127.0.0.1:9", timeout=2).get("/models")
+
+
+def test_silent_server_counts_as_unreachable():
+    import socket
+
+    srv = socket.socket()
+    srv.bind(("127.0.0.1", 0))
+    srv.listen(5)  # accepts connections but never answers
+    port = srv.getsockname()[1]
+    try:
+        with pytest.raises(ConnectError, match="no response"):
+            Client("http://127.0.0.1:%d/v1" % port, timeout=0.5).get("/models")
+    finally:
+        srv.close()

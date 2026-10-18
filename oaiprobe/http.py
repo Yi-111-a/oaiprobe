@@ -144,6 +144,7 @@ class Client:
         self.api_key = api_key
         self.extra_headers = dict(headers or {})
         self.timeout = timeout
+        self.seen_response = False  # has the endpoint ever answered at all?
 
     def _headers(self, auth: bool = True, stream: bool = False) -> Dict[str, str]:
         h = {"User-Agent": USER_AGENT, "Accept": "text/event-stream" if stream else "application/json"}
@@ -165,18 +166,26 @@ class Client:
             headers["Content-Type"] = "application/json"
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
         try:
-            return urllib.request.urlopen(req, timeout=self.timeout)
+            resp = urllib.request.urlopen(req, timeout=self.timeout)
         except urllib.error.HTTPError as exc:
-            return exc
+            resp = exc
         except urllib.error.URLError as exc:
             reason = exc.reason
             if isinstance(reason, (socket.timeout, TimeoutError)):
-                raise ProbeError("timed out after %gs" % self.timeout) from exc
+                raise self._timeout(url) from exc
             raise ConnectError("cannot reach %s: %s" % (url, reason)) from exc
         except (socket.timeout, TimeoutError) as exc:
-            raise ProbeError("timed out after %gs" % self.timeout) from exc
+            raise self._timeout(url) from exc
         except (ConnectionError, OSError) as exc:
             raise ConnectError("cannot reach %s: %s" % (url, exc)) from exc
+        self.seen_response = True
+        return resp
+
+    def _timeout(self, url: str) -> ProbeError:
+        if not self.seen_response:
+            # nothing has ever come back: treat as unreachable instead of timing out every check
+            return ConnectError("no response from %s within %gs" % (url, self.timeout))
+        return ProbeError("timed out after %gs" % self.timeout)
 
     def request(self, method: str, path: str, payload: Any = None, auth: bool = True) -> Response:
         start = time.perf_counter()
