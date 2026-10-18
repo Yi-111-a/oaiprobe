@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1230" height="324" viewBox="0 0 1230 324">
+<rect width="1230" height="324" rx="8" fill="#0d1117"/>
+<circle cx="18" cy="16" r="5" fill="#ff5f56"/><circle cx="36" cy="16" r="5" fill="#ffbd2e"/><circle cx="54" cy="16" r="5" fill="#27c93f"/>
+<g font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12.5">
+<text x="14" y="44" fill="#7ee787" xml:space="preserve">$ oaiprobe --mock substitute_model,cumulative_args,no_stream_usage,fenced_json --quick</text>
+<text x="14" y="62" fill="#8b949e" xml:space="preserve">oaiprobe 0.1.0  http://127.0.0.1:8080/v1  model=mock-1</text>
+<text x="14" y="80" fill="#8b949e" xml:space="preserve">built-in mock server with quirks: substitute_model,cumulative_args,no_stream_usage,fenced_json</text>
+<text x="14" y="98" fill="#c9d1d9" xml:space="preserve"></text>
+<text x="14" y="116" fill="#c9d1d9" xml:space="preserve">models          <tspan fill="#3fb950" font-weight="bold">PASS</tspan>   0.01s  1 model, &#x27;mock-1&#x27; is listed</text>
+<text x="14" y="134" fill="#c9d1d9" xml:space="preserve">chat            <tspan fill="#d29922" font-weight="bold">WARN</tspan>   0.00s  served by &#x27;cheap-mini&#x27; although &#x27;mock-1&#x27; was requested; replied &#x27;pong&#x27;; usage 14+1 tokens</text>
+<text x="14" y="152" fill="#c9d1d9" xml:space="preserve">stream          <tspan fill="#3fb950" font-weight="bold">PASS</tspan>   0.00s  3 chunks, first token after 0.00s</text>
+<text x="14" y="170" fill="#c9d1d9" xml:space="preserve">stream_usage    <tspan fill="#d29922" font-weight="bold">WARN</tspan>   0.00s  include_usage ignored: no usage chunk, so streamed calls cannot be metered</text>
+<text x="14" y="188" fill="#c9d1d9" xml:space="preserve">tools           <tspan fill="#3fb950" font-weight="bold">PASS</tspan>   0.00s  get_weather({&quot;city&quot;: &quot;Paris&quot;})</text>
+<text x="14" y="206" fill="#c9d1d9" xml:space="preserve">tool_roundtrip  <tspan fill="#3fb950" font-weight="bold">PASS</tspan>   0.00s  answer uses the tool result: &#x27;It is 21°C and sunny in Paris.&#x27;</text>
+<text x="14" y="224" fill="#c9d1d9" xml:space="preserve">stream_tools    <tspan fill="#f85149" font-weight="bold">FAIL</tspan>   0.00s  each chunk repeats the full arguments so far instead of sending deltas</text>
+<text x="14" y="242" fill="#c9d1d9" xml:space="preserve">json_mode       <tspan fill="#d29922" font-weight="bold">WARN</tspan>   0.00s  JSON is wrapped in a markdown code fence; json.loads() on content will fail</text>
+<text x="14" y="260" fill="#c9d1d9" xml:space="preserve">bad_model       <tspan fill="#d29922" font-weight="bold">WARN</tspan>   0.00s  accepted model &#x27;oaiprobe-no-such-model-7f3a&#x27; and answered as &#x27;cheap-mini&#x27;: wrong model names are silently served by s...</text>
+<text x="14" y="278" fill="#c9d1d9" xml:space="preserve"></text>
+<text x="14" y="296" fill="#f85149" xml:space="preserve">4 pass, 4 warn, 1 fail: not compatible enough for drop-in use</text>
+</g>
+</svg>

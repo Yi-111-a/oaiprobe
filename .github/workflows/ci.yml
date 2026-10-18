@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+          - os: macos-latest
+            python-version: "3.13"
+          - os: windows-latest
+            python-version: "3.13"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: python -m pip install . pytest
+      - name: Test
+        run: python -m pytest -q
+      - name: CLI smoke test
+        shell: bash
+        run: |
+          oaiprobe --version
+          oaiprobe --mock
+          oaiprobe --mock reasoning -f json --quick > /dev/null
+          ! oaiprobe --mock cumulative_args --only stream_tools
+
+  live-llama-cpp:
+    # Probe a real OpenAI-compatible server: llama.cpp's llama-server with a tiny Qwen model on CPU.
+    runs-on: ubuntu-latest
+    env:
+      LLAMA_TAG: b11716
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Download llama.cpp and Qwen2.5-0.5B-Instruct (Q4_K_M)
+        run: |
+          curl -sSfL -o llama.tgz "https://github.com/ggml-org/llama.cpp/releases/download/${LLAMA_TAG}/llama-${LLAMA_TAG}-bin-ubuntu-x64.tar.gz"
+          tar xzf llama.tgz
+          curl -sSfL -o qwen.gguf "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+      - name: Start llama-server
+        run: |
+          ./llama-${LLAMA_TAG}/llama-server -m qwen.gguf --jinja -c 4096 --host 127.0.0.1 --port 8080 --api-key sk-ci -a qwen2.5-0.5b > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf -H "Authorization: Bearer sk-ci" http://127.0.0.1:8080/v1/models > /dev/null && break; sleep 2; done
+      - name: Probe it
+        run: |
+          python -m pip install .
+          oaiprobe -u http://127.0.0.1:8080/v1 -k sk-ci -m qwen2.5-0.5b -p temperature=0 -p seed=1 --timeout 120
+          oaiprobe -u http://127.0.0.1:8080/v1 -k sk-ci -m qwen2.5-0.5b -p temperature=0 -p seed=1 --timeout 120 -f markdown >> "$GITHUB_STEP_SUMMARY"
+      - name: Server log on failure
+        if: failure()
+        run: tail -n 100 server.log

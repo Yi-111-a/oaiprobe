@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oaiprobe"
+version = "0.1.0"
+description = "Check how OpenAI-compatible an LLM endpoint really is: streaming, usage, tool calls, JSON mode, structured outputs, limits, errors, auth and silent model substitution."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Yi-111-a"}]
+keywords = ["openai", "openai-compatible", "llm", "api", "conformance", "tool-calling", "deepseek", "vllm", "ollama", "llama-cpp", "cli"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Environment :: Console",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/Yi-111-a/oaiprobe"
+Issues = "https://github.com/Yi-111-a/oaiprobe/issues"
+
+[project.scripts]
+oaiprobe = "oaiprobe.cli:main"
+
+[tool.setuptools]
+packages = ["oaiprobe"]
