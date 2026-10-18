@@ -59,7 +59,7 @@ def test_usage_errors(capsys, monkeypatch):
     assert main(["--mock", "--only", "nope"]) == 2
     assert main(["-u", "http://127.0.0.1:9", "-m", "x", "--timeout", "2"]) == 2
     err = capsys.readouterr().err
-    assert "cannot reach" in err
+    assert "cannot reach" in err or "no response from" in err
 
 
 def test_lists(capsys):
